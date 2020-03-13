@@ -71,7 +71,7 @@ promise
         }
     )
     .catch(
-        //Handling errors during the promise chain, untill before the catch, and the reject case
+        //Handling errors during the promise chain, untill before the catch, and the promise's reject case
         function (err) {
             console.log(err.code, err.message);
         }
