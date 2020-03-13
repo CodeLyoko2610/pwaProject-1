@@ -16,3 +16,28 @@ window.addEventListener('beforeinstallprompt', function (event) {
 
     return false; //for not doing anything with the event
 })
+
+////Review callback functions
+// setTimeout(function () {
+//     console.log('This is executed once timer is done.')
+// }, 3000);
+
+// console.log('This is executed right after the setTimeout().');
+
+//The example above. Done with Promise
+let promise = new Promise(function (resolve, reject) {
+    setTimeout(function () {
+        resolve('This is executed once timer is done.');
+    }, 3000);
+});
+
+//Chaining actions to the promise
+promise
+    .then(function (promiseResult) {
+        return promiseResult; //return an synchronous value
+    })
+    .then(function (nextResult) {
+        console.log(nextResult);
+    })
+
+console.log('This is executed right after the setTimeout().')
