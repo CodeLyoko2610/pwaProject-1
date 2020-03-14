@@ -94,3 +94,25 @@ fetch('http://httpbin.org/ip')
   .catch(function(err) {
     console.error(err);
   });
+
+//Test fetch command - sending POST request
+fetch('http://httpbin.org/post', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json' //accept only returned data type of json - depends on which API, some dont care
+  },
+  body: JSON.stringify({ message: 'Does this work?' }) //data sent is set to type json. JSON.stringify parse the JS obj to JSON string
+})
+  .then(function(res) {
+    console.log(res);
+
+    //Parse json to js object
+    return res.json(); //this return a promise
+  })
+  .then(function(parsedData) {
+    console.log(parsedData);
+  })
+  .catch(function(err) {
+    console.error(err);
+  });
