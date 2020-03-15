@@ -80,6 +80,21 @@ promise
   );
 console.log('This is executed right after the setTimeout().');
 
+//Reference AJAX method vs fetch - GET request
+let xhr = new XMLHttpRequest();
+xhr.open('GET', 'http://httpbin.org/ip');
+xhr.responseType = 'json';
+
+xhr.onload = function() {
+  console.log(xhr.response);
+};
+
+xhr.onerror = function() {
+  console.log('Error.');
+};
+
+xhr.send();
+
 //Test fetch command - sending GET request
 fetch('http://httpbin.org/ip')
   .then(function(res) {
