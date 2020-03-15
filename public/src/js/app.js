@@ -102,6 +102,7 @@ fetch('http://httpbin.org/post', {
     'Content-Type': 'application/json',
     Accept: 'application/json' //accept only returned data type of json - depends on which API, some dont care
   },
+  mode: 'cors',
   body: JSON.stringify({ message: 'Does this work?' }) //data sent is set to type json. JSON.stringify parse the JS obj to JSON string
 })
   .then(function(res) {
