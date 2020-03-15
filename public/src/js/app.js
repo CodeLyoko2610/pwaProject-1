@@ -85,7 +85,7 @@ fetch('http://httpbin.org/ip')
   .then(function(res) {
     console.log(res);
 
-    //Parse json to js object
+    //Parse Response obj to JSON obj
     return res.json(); //this return a promise
   })
   .then(function(parsedData) {
@@ -106,8 +106,9 @@ fetch('http://httpbin.org/post', {
 })
   .then(function(res) {
     console.log(res);
+    console.log(typeof res);
 
-    //Parse json to js object
+    //Parse Response obj to JSON obj
     return res.json(); //this return a promise
   })
   .then(function(parsedData) {
