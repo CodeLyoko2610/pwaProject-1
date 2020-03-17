@@ -1,3 +1,8 @@
+//Check if browser supports Promise, if not use polyfill
+if(!window.Promise){
+  window.Promise = Promise;
+}
+
 //Register a service worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
