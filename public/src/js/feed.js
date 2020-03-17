@@ -2,6 +2,7 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 
+//Criteria for PWA installation
 function openCreatePostModal() {
   createPostArea.style.display = 'block';
 
@@ -33,3 +34,41 @@ function closeCreatePostModal() {
 shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
+
+function createCard() {
+  let cardWrapper = document.createElement('div');
+  cardWrapper.className = 'shared-moment-card mdl-card mdl-shasow--2dp';
+
+  let cardTitle = document.createElement('div');
+  cardTitle.className = 'mdl-card__title';
+  cardTitle.style.backgroundImage = 'url("src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundSize = 'cover';
+  cardTitle.style.height = '180px';
+  cardWrapper.appendChild(cardTitle);
+
+  let cardTitleTextElement = document.createElement('h2');
+  cardTitleTextElement.className = 'mdl-card__title-text';
+  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitle.appendChild(cardTitleTextElement);
+
+  let cardSupportingText = document.createElement('div');
+  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.style.textAlign = 'center';
+  cardWrapper.appendChild(cardSupportingText);
+
+  componentHandler.upgradeElement(cardWrapper); //Using the material-design-lite library for beautiful card design
+  sharedMomentsArea.appendChild(cardWrapper);
+}
+
+//Reach url endpoint, send back dummy response and create card
+fetch('https:/httpbin.org/get')
+  .then(function (res) {
+    return res.json();
+  })
+  .then(() => {
+    console.log('Creating new card.');
+
+    (data) => {
+      createCard();
+    }
+  })
