@@ -11,6 +11,5 @@ self.addEventListener('activate', function (event) {
 
 //triggered by the app itself
 self.addEventListener('fetch', function (event) {
-    console.log('[Service Worker] Fetching something...', event);
     event.respondWith(fetch(event.request)); //override the default response example    
 })

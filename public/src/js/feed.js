@@ -1,6 +1,7 @@
-var shareImageButton = document.querySelector('#share-image-button');
-var createPostArea = document.querySelector('#create-post');
-var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
+let shareImageButton = document.querySelector('#share-image-button');
+let createPostArea = document.querySelector('#create-post');
+let closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
+let sharedMomentsArea = document.querySelector('#shared-moments');
 
 //Criteria for PWA installation
 function openCreatePostModal() {
@@ -37,7 +38,7 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
 function createCard() {
   let cardWrapper = document.createElement('div');
-  cardWrapper.className = 'shared-moment-card mdl-card mdl-shasow--2dp';
+  cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
 
   let cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
@@ -52,12 +53,15 @@ function createCard() {
   cardTitle.appendChild(cardTitleTextElement);
 
   let cardSupportingText = document.createElement('div');
+  cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
   cardWrapper.appendChild(cardSupportingText);
 
   componentHandler.upgradeElement(cardWrapper); //Using the material-design-lite library for beautiful card design
   sharedMomentsArea.appendChild(cardWrapper);
+
+  console.log('Card created.');
 }
 
 //Reach url endpoint, send back dummy response and create card
@@ -66,9 +70,6 @@ fetch('https:/httpbin.org/get')
     return res.json();
   })
   .then(() => {
-    console.log('Creating new card.');
-
-    (data) => {
-      createCard();
-    }
+    console.log('Creating new card...');
+    createCard();
   })
