@@ -48,6 +48,9 @@ self.addEventListener('fetch', function(event) {
               cache.put(event.request.url, res.clone()); //store the url and the res clone as the res is one time only
               return res;
             });
+          })
+          .catch(function(error) {
+            //Dummy function to catch errors
           });
       }
     })
