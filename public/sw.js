@@ -1,3 +1,7 @@
+//Version control of cache
+const STATIC_ASSET_VERSION = 'staticAsset-v4';
+const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v2';
+
 //triggered by the browser
 self.addEventListener('install', function (event) {
     console.log('[Service Worker] Installing the service worker...', event);
@@ -5,7 +9,7 @@ self.addEventListener('install', function (event) {
     //Pre-Caching static assets
     //Wait untill caching is done before finishing installation SW
     event.waitUntil(
-        caches.open('staticAsset-v3').then(function (cache) {
+        caches.open(STATIC_ASSET_VERSION).then(function (cache) {
             console.log('[Service Worker] Pre-caching App Shell...');
             cache.addAll([
                 '/',
@@ -37,7 +41,7 @@ self.addEventListener('activate', function (event) {
             return Promise.all(
                 //Create a promises array from the string array keysList
                 keysList.map(function (key) {
-                    if (key !== 'staticAsset-v3' && key !== 'dynamicAsset') {
+                    if (key !== STATIC_ASSET_VERSION && key !== DYNAMIC_ASSET_VERSION) {
                         console.log('[Service Worker] Removing old cache...', key);
                         return caches.delete(key);
                     }
@@ -60,7 +64,7 @@ self.addEventListener('fetch', function (event) {
             } else {
                 return fetch(event.request) //make fetch request response not yet stored in cache
                     .then(function (res) {
-                        return caches.open('dynamicAsset').then(function (cache) {
+                        return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
                             //Call put method to place the request and response (not execute and store as add method)
                             cache.put(event.request.url, res.clone()); //store the url and the res clone as the res is one time only
                             return res;
