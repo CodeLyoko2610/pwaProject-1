@@ -54,31 +54,44 @@ self.addEventListener('activate', function (event) {
     return self.clients.claim(); //Make the current service worker controls every pages under its scope immediately rather than waiting for reloading.
 });
 
+// //CACHING STRATERGY: cache with network fallback
+// //triggered by the app itself
+// self.addEventListener('fetch', function (event) {
+//     //Override the default response example
+//     event.respondWith(
+//         //Check if there is a cache for the request
+//         caches.match(event.request).then(function (response) {
+//             if (response) {
+//                 return response; //return response from cache if available
+//             } else {
+//                 return fetch(event.request) //make fetch request response not yet stored in cache
+//                     .then(function (res) {
+//                         return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
+//                             //Call put method to place the request and response (not execute and store as add method)
+//                             cache.put(event.request.url, res.clone()); //store the url and the res clone as the res is one time only
+//                             return res;
+//                         });
+//                     })
+//                     .catch(function (error) {
+//                         //When cannot make request (e.g no network)
+//                         return caches.open(STATIC_ASSET_VERSION)
+//                             .then(function (cache) {
+//                                 return cache.match('/offline.html');
+//                             })
+//                     });
+//             }
+//         })
+//     );
+// });
+
+// //CACHING STRATERGY: cache-only
 //triggered by the app itself
 self.addEventListener('fetch', function (event) {
     //Override the default response example
     event.respondWith(
         //Check if there is a cache for the request
         caches.match(event.request).then(function (response) {
-            if (response) {
-                return response; //return response from cache if available
-            } else {
-                return fetch(event.request) //make fetch request response not yet stored in cache
-                    .then(function (res) {
-                        return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
-                            //Call put method to place the request and response (not execute and store as add method)
-                            cache.put(event.request.url, res.clone()); //store the url and the res clone as the res is one time only
-                            return res;
-                        });
-                    })
-                    .catch(function (error) {
-                        //When cannot make request (e.g no network)
-                        return caches.open(STATIC_ASSET_VERSION)
-                            .then(function (cache) {
-                                return cache.match('/offline.html');
-                            })
-                    });
-            }
+            return response; //return response from cache if available
         })
-    );
-});
+    )
+})
