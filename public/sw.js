@@ -1,5 +1,5 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v7';
+const STATIC_ASSET_VERSION = 'staticAsset-v10';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v2';
 
 //triggered by the browser
@@ -14,6 +14,7 @@ self.addEventListener('install', function (event) {
             cache.addAll([
                 '/',
                 '/index.html',
+                '/offline.html',
                 '/src/js/app.js',
                 '/src/js/feed.js',
                 '/src/js/polyfills/fetch.js',
@@ -71,7 +72,11 @@ self.addEventListener('fetch', function (event) {
                         });
                     })
                     .catch(function (error) {
-                        //Dummy function to catch errors
+                        //When cannot make request (e.g no network)
+                        return caches.open(STATIC_ASSET_VERSION)
+                            .then(function (cache) {
+                                return cache.match('/offline.html');
+                            })
                     });
             }
         })
