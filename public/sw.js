@@ -60,6 +60,13 @@ self.addEventListener('fetch', function (event) {
     //Override the default response example
     event.respondWith(
         fetch(event.request)
+        .then(function (response) {
+            return caches.open(DYNAMIC_ASSET_VERSION)
+                .then(function (cache) {
+                    cache.put(event.request.url, response.clone());
+                    return response;
+                })
+        })
         .catch(function (error) {
             //Basically when the network fails, catch the problem and go for the cache
             return caches.match(event.request)
