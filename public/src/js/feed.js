@@ -36,6 +36,10 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
+function onSaveButtonClicked() {
+  console.log('Save button clicked.');
+}
+
 function createCard() {
   let cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
@@ -57,6 +61,12 @@ function createCard() {
   cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
+
+  let cardSaveButton = document.createElement('button');
+  cardSupportingText.appendChild(cardSaveButton);
+  cardSaveButton.textContent = 'Save';
+  cardSaveButton.addEventListener('click', onSaveButtonClicked);
+
   cardWrapper.appendChild(cardSupportingText);
 
   componentHandler.upgradeElement(cardWrapper); //Using the material-design-lite library for beautiful card design

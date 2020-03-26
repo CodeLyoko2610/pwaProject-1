@@ -1,5 +1,5 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v4';
+const STATIC_ASSET_VERSION = 'staticAsset-v6';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v2';
 
 //triggered by the browser
@@ -66,7 +66,7 @@ self.addEventListener('fetch', function (event) {
                     .then(function (res) {
                         return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
                             //Call put method to place the request and response (not execute and store as add method)
-                            cache.put(event.request.url, res.clone()); //store the url and the res clone as the res is one time only
+                            //cache.put(event.request.url, res.clone()); //store the url and the res clone as the res is one time only
                             return res;
                         });
                     })
