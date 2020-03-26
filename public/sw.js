@@ -54,6 +54,19 @@ self.addEventListener('activate', function (event) {
     return self.clients.claim(); //Make the current service worker controls every pages under its scope immediately rather than waiting for reloading.
 });
 
+//CACHING STRATERGY: network with cache fallback
+//triggered by the app itself
+self.addEventListener('fetch', function (event) {
+    //Override the default response example
+    event.respondWith(
+        fetch(event.request)
+        .catch(function (error) {
+            //Basically when the network fails, catch the problem and go for the cache
+            return caches.match(event.request)
+        })
+    )
+});
+
 // //CACHING STRATERGY: cache with network fallback
 // //triggered by the app itself
 // self.addEventListener('fetch', function (event) {
@@ -97,10 +110,10 @@ self.addEventListener('activate', function (event) {
 // })
 
 //CACHING STRATERGY: network-only
-//triggered by the app itself
-self.addEventListener('fetch', function (event) {
-    //Override the default response example
-    event.respondWith(
-        fetch(event.request)
-    )
-})
+// //triggered by the app itself
+// self.addEventListener('fetch', function (event) {
+//     //Override the default response example
+//     event.respondWith(
+//         fetch(event.request)
+//     )
+// })
