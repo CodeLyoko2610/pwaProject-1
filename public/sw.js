@@ -1,5 +1,5 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v6';
+const STATIC_ASSET_VERSION = 'staticAsset-v7';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v2';
 
 //triggered by the browser

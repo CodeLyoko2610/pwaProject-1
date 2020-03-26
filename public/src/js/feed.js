@@ -38,6 +38,16 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
 function onSaveButtonClicked() {
   console.log('Save button clicked.');
+
+  //Accesing cache, store user-requested assets
+  //Checking if cache API is supported. If not, do nothing.
+  if ('caches' in window) {
+    caches.open('userRequestedAssets')
+      .then(function (cache) {
+        cache.add('https:/httpbin.org/get');
+        cache.add('/src/images/sf-boat.jpg');
+      })
+  }
 }
 
 function createCard() {
