@@ -84,14 +84,23 @@ self.addEventListener('activate', function (event) {
 //     );
 // });
 
-// //CACHING STRATERGY: cache-only
+//CACHING STRATERGY: cache-only
+// //triggered by the app itself
+// self.addEventListener('fetch', function (event) {
+//     //Override the default response example
+//     event.respondWith(
+//         //Check if there is a cache for the request
+//         caches.match(event.request).then(function (response) {
+//             return response; //return response from cache if available
+//         })
+//     )
+// })
+
+//CACHING STRATERGY: network-only
 //triggered by the app itself
 self.addEventListener('fetch', function (event) {
     //Override the default response example
     event.respondWith(
-        //Check if there is a cache for the request
-        caches.match(event.request).then(function (response) {
-            return response; //return response from cache if available
-        })
+        fetch(event.request)
     )
 })
