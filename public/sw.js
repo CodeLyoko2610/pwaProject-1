@@ -1,5 +1,5 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v10';
+const STATIC_ASSET_VERSION = 'staticAsset-v12';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v2';
 
 //triggered by the browser
@@ -54,6 +54,8 @@ self.addEventListener('activate', function (event) {
     return self.clients.claim(); //Make the current service worker controls every pages under its scope immediately rather than waiting for reloading.
 });
 
+//CACHING STRATERGY: cache then network
+
 //CACHING STRATERGY: network with cache fallback
 //triggered by the app itself
 self.addEventListener('fetch', function (event) {
@@ -61,17 +63,16 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(
         fetch(event.request)
         .then(function (response) {
-            return caches.open(DYNAMIC_ASSET_VERSION)
-                .then(function (cache) {
-                    cache.put(event.request.url, response.clone());
-                    return response;
-                })
+            return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
+                cache.put(event.request.url, response.clone());
+                return response;
+            });
         })
         .catch(function (error) {
             //Basically when the network fails, catch the problem and go for the cache
-            return caches.match(event.request)
+            return caches.match(event.request);
         })
-    )
+    );
 });
 
 // //CACHING STRATERGY: cache with network fallback

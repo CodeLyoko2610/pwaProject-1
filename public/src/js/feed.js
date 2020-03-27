@@ -50,6 +50,13 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 //   }
 // }
 
+//Clear all existing cards
+function clearCards() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild); //Delete one child per iteration / loop
+  }
+}
+
 function createCard() {
   let cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
@@ -86,11 +93,52 @@ function createCard() {
 }
 
 //Reach url endpoint, send back dummy response and create card
-fetch('https:/httpbin.org/get')
+// fetch('https:/httpbin.org/get')
+//   .then(function (res) {
+//     return res.json();
+//   })
+//   .then(() => {
+//     console.log('Creating new card...');
+//     createCard();
+//   })
+
+//CACHING STRATERGY: cache then network
+let url = 'https:/httpbin.org/get';
+let networkDataReceived = false;
+
+//Load from network
+//aka loading newest version
+fetch(url)
   .then(function (res) {
     return res.json();
   })
-  .then(() => {
-    console.log('Creating new card...');
-    createCard();
+  .then((data) => {
+    networkDataReceived = true;
+    console.log('From network: ', data);
+    clearCards(); //Remove existing versions
+    createCard(); //With network version (updated version)
   })
+
+//Load from cache
+if ('caches' in window) {
+  caches.match(url)
+    .then(
+      function (response) {
+        //Only if there is a response / request-response is cached 
+        if (response) {
+          return response.json();
+        }
+      }
+    )
+    .then(
+      function (data) {
+        //Only load from cache if cannot get from network (newest version)
+        if (!networkDataReceived) {
+          console.log('From cache: ', data);
+          clearCards(); //Remove existing version
+          createCard(); //with cached version
+        }
+      }
+
+    )
+}
