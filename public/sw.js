@@ -1,6 +1,6 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v12';
-const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v2';
+const STATIC_ASSET_VERSION = 'staticAsset-v14';
+const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v3';
 
 //triggered by the browser
 self.addEventListener('install', function (event) {
@@ -55,27 +55,42 @@ self.addEventListener('activate', function (event) {
 });
 
 //CACHING STRATERGY: cache then network
+self.addEventListener('fetch', function (event) {
+    //Add Dynamic caching to the stratergy
+    //Intercept any fetch events, inluding fetch events in the feed.js for CACHE THEN NETWORK STRATERGY
+    event.respondWith(
+        caches.open(DYNAMIC_ASSET_VERSION)
+        .then(function (cache) {
+            //After open the cache, re-fetch and store the request and response in cache
+            return fetch(event.request)
+                .then(function (res) {
+                    cache.put(event.request.url, res.clone());
+                    return res; //Return response, the "then" chain in feedjs fetch event goes on                            
+                })
+        })
+    )
+})
 
 //CACHING STRATERGY: network with cache fallback
 //triggered by the app itself
-self.addEventListener('fetch', function (event) {
-    //Override the default response example
-    event.respondWith(
-        fetch(event.request)
-        .then(function (response) {
-            return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
-                cache.put(event.request.url, response.clone());
-                return response;
-            });
-        })
-        .catch(function (error) {
-            //Basically when the network fails, catch the problem and go for the cache
-            return caches.match(event.request);
-        })
-    );
-});
+// self.addEventListener('fetch', function (event) {
+//     //Override the default response example
+//     event.respondWith(
+//         fetch(event.request)
+//         .then(function (response) {
+//             return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
+//                 cache.put(event.request.url, response.clone());
+//                 return response;
+//             });
+//         })
+//         .catch(function (error) {
+//             //Basically when the network fails, catch the problem and go for the cache
+//             return caches.match(event.request);
+//         })
+//     );
+// });
 
-// //CACHING STRATERGY: cache with network fallback
+// //CACHING STRATERGY: cache with network fallback, and a final cache fallback
 // //triggered by the app itself
 // self.addEventListener('fetch', function (event) {
 //     //Override the default response example
