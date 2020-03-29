@@ -1,75 +1,105 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v14';
-const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v3';
+const STATIC_ASSET_VERSION = 'staticAsset-v16';
+const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v6';
 
 //triggered by the browser
-self.addEventListener('install', function (event) {
-    console.log('[Service Worker] Installing the service worker...', event);
+self.addEventListener('install', function(event) {
+  console.log('[Service Worker] Installing the service worker...', event);
 
-    //Pre-Caching static assets
-    //Wait untill caching is done before finishing installation SW
-    event.waitUntil(
-        caches.open(STATIC_ASSET_VERSION).then(function (cache) {
-            console.log('[Service Worker] Pre-caching App Shell...');
-            cache.addAll([
-                '/',
-                '/index.html',
-                '/offline.html',
-                '/src/js/app.js',
-                '/src/js/feed.js',
-                '/src/js/polyfills/fetch.js',
-                '/src/js/polyfills/promise.js',
-                '/src/js/material.min.js',
-                '/src/css/app.css',
-                '/src/css/feed.css',
-                '/src/images/main-image.jpg',
-                'https://fonts.googleapis.com/css?family=Roboto:400,700',
-                'https://fonts.googleapis.com/icon?family=Material+Icons',
-                'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-            ]);
-        })
-    );
+  //Pre-Caching static assets
+  //Wait untill caching is done before finishing installation SW
+  event.waitUntil(
+    caches.open(STATIC_ASSET_VERSION).then(function(cache) {
+      console.log('[Service Worker] Pre-caching App Shell...');
+      cache.addAll([
+        '/',
+        '/index.html',
+        '/offline.html',
+        '/src/js/app.js',
+        '/src/js/feed.js',
+        '/src/js/polyfills/fetch.js',
+        '/src/js/polyfills/promise.js',
+        '/src/js/material.min.js',
+        '/src/css/app.css',
+        '/src/css/feed.css',
+        '/src/images/main-image.jpg',
+        'https://fonts.googleapis.com/css?family=Roboto:400,700',
+        'https://fonts.googleapis.com/icon?family=Material+Icons',
+        'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
+      ]);
+    })
+  );
 });
 
 //triggered by the browser
-self.addEventListener('activate', function (event) {
-    console.log('[Service Worker] Activating the service worker...', event);
+self.addEventListener('activate', function(event) {
+  console.log('[Service Worker] Activating the service worker...', event);
 
-    //Deleting old version of sw
-    event.waitUntil(
-        caches.keys().then(function (keysList) {
-            //Execute all promises before continue
-            return Promise.all(
-                //Create a promises array from the string array keysList
-                keysList.map(function (key) {
-                    if (key !== STATIC_ASSET_VERSION && key !== DYNAMIC_ASSET_VERSION) {
-                        console.log('[Service Worker] Removing old cache...', key);
-                        return caches.delete(key);
-                    }
-                })
-            );
+  //Deleting old version of sw
+  event.waitUntil(
+    caches.keys().then(function(keysList) {
+      //Execute all promises before continue
+      return Promise.all(
+        //Create a promises array from the string array keysList
+        keysList.map(function(key) {
+          if (key !== STATIC_ASSET_VERSION && key !== DYNAMIC_ASSET_VERSION) {
+            console.log('[Service Worker] Removing old cache...', key);
+            return caches.delete(key);
+          }
         })
-    );
+      );
+    })
+  );
 
-    return self.clients.claim(); //Make the current service worker controls every pages under its scope immediately rather than waiting for reloading.
+  return self.clients.claim(); //Make the current service worker controls every pages under its scope immediately rather than waiting for reloading.
 });
 
-//CACHING STRATERGY: cache then network
-self.addEventListener('fetch', function (event) {
-    //Add Dynamic caching to the stratergy
-    //Intercept any fetch events, inluding fetch events in the feed.js for CACHE THEN NETWORK STRATERGY
+//CACHING STRATERGY: cache then network MIX network with cache fallback
+self.addEventListener('fetch', function(event) {
+  //Add Dynamic caching to the stratergy
+  //Intercept any fetch events, inluding fetch events in the feed.js
+
+  //Use CACHE THEN NETWORK STRATERGY for fetching url from feed.js
+  let url = 'https:/httpbin.org/get';
+  if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
-        caches.open(DYNAMIC_ASSET_VERSION)
-        .then(function (cache) {
-            //After open the cache, re-fetch and store the request and response in cache
-            return fetch(event.request)
-                .then(function (res) {
-                    cache.put(event.request.url, res.clone());
-                    return res; //Return response, the "then" chain in feedjs fetch event goes on                            
-                })
-        })
-    )
-})
+      caches.open(DYNAMIC_ASSET_VERSION).then(function(cache) {
+        //After open the cache, REACH OUT TO THE NETWORK, re-fetch and store the request and response in cache
+        return fetch(event.request).then(function(res) {
+          cache.put(event.request.url, res.clone());
+          return res; //Return response, the "then" chain in feedjs fetch event goes on
+        });
+      })
+    );
+    //For other urls, use CACHE WITH NETWORK FALLBACK - with final cache fallback STRATERGY
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        if (response) {
+          //return the response from cache
+          return response;
+        } else {
+          return (
+            fetch(event.request)
+              //network fallback
+              .then(function(res) {
+                return caches.open(DYNAMIC_ASSET_VERSION).then(function(cache) {
+                  cache.put(event.request.url, res.clone());
+                  return res;
+                });
+              })
+              //final cache fallback
+              .catch(function(err) {
+                return caches.open(STATIC_ASSET_VERSION).then(function(cache) {
+                  return cache.match('/offline.html');
+                });
+              })
+          );
+        }
+      })
+    );
+  }
+});
 
 //CACHING STRATERGY: network with cache fallback
 //triggered by the app itself

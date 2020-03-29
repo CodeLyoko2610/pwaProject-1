@@ -1,6 +1,8 @@
 let shareImageButton = document.querySelector('#share-image-button');
 let createPostArea = document.querySelector('#create-post');
-let closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
+let closeCreatePostModalButton = document.querySelector(
+  '#close-create-post-modal-btn'
+);
 let sharedMomentsArea = document.querySelector('#shared-moments');
 
 //Criteria for PWA installation
@@ -12,7 +14,7 @@ function openCreatePostModal() {
     defferedPrompt.prompt();
 
     //Check user choice
-    defferedPrompt.userChoice.then(function (choiceResult) {
+    defferedPrompt.userChoice.then(function(choiceResult) {
       console.log(choiceResult);
 
       if (choiceResult.outcome === 'dismissed') {
@@ -23,8 +25,7 @@ function openCreatePostModal() {
 
       //Set the variable to null
       defferedPrompt = null;
-
-    })
+    });
   }
 }
 
@@ -106,39 +107,35 @@ function createCard() {
 let url = 'https:/httpbin.org/get';
 let networkDataReceived = false;
 
-//Load from network
+//1.1  Load from network
 //aka loading newest version
 fetch(url)
-  .then(function (res) {
+  .then(function(res) {
     return res.json();
   })
-  .then((data) => {
+  .then(data => {
     networkDataReceived = true;
     console.log('From network: ', data);
     clearCards(); //Remove existing versions
     createCard(); //With network version (updated version)
-  })
+  });
 
-//Load from cache
+//1. Load from cache
 if ('caches' in window) {
-  caches.match(url)
-    .then(
-      function (response) {
-        //Only if there is a response / request-response is cached 
-        if (response) {
-          return response.json();
-        }
+  caches
+    .match(url)
+    .then(function(response) {
+      //Only if there is a response / request-response is cached
+      if (response) {
+        return response.json();
       }
-    )
-    .then(
-      function (data) {
-        //Only load from cache if cannot get from network (newest version)
-        if (!networkDataReceived) {
-          console.log('From cache: ', data);
-          clearCards(); //Remove existing version
-          createCard(); //with cached version
-        }
+    })
+    .then(function(data) {
+      //Only load from cache if cannot get from network (newest version)
+      if (!networkDataReceived) {
+        console.log('From cache: ', data);
+        clearCards(); //Remove existing version
+        createCard(); //with cached version
       }
-
-    )
+    });
 }
