@@ -1,6 +1,22 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v18';
-const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v8  ';
+const STATIC_ASSET_VERSION = 'staticAsset-v20';
+const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v10  ';
+const STATIC_ASSET_FILES = [
+  '/',
+  '/index.html',
+  '/offline.html',
+  '/src/js/app.js',
+  '/src/js/feed.js',
+  '/src/js/polyfills/fetch.js',
+  '/src/js/polyfills/promise.js',
+  '/src/js/material.min.js',
+  '/src/css/app.css',
+  '/src/css/feed.css',
+  '/src/images/main-image.jpg',
+  'https://fonts.googleapis.com/css?family=Roboto:400,700',
+  'https://fonts.googleapis.com/icon?family=Material+Icons',
+  'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
+];
 
 //triggered by the browser
 self.addEventListener('install', function(event) {
@@ -11,22 +27,7 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(STATIC_ASSET_VERSION).then(function(cache) {
       console.log('[Service Worker] Pre-caching App Shell...');
-      cache.addAll([
-        '/',
-        '/index.html',
-        '/offline.html',
-        '/src/js/app.js',
-        '/src/js/feed.js',
-        '/src/js/polyfills/fetch.js',
-        '/src/js/polyfills/promise.js',
-        '/src/js/material.min.js',
-        '/src/css/app.css',
-        '/src/css/feed.css',
-        '/src/images/main-image.jpg',
-        'https://fonts.googleapis.com/css?family=Roboto:400,700',
-        'https://fonts.googleapis.com/icon?family=Material+Icons',
-        'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-      ]);
+      cache.addAll(STATIC_ASSET_FILES);
     })
   );
 });
@@ -54,7 +55,7 @@ self.addEventListener('activate', function(event) {
   return self.clients.claim(); //Make the current service worker controls every pages under its scope immediately rather than waiting for reloading.
 });
 
-//CACHING STRATERGY: cache then network MIX network with cache fallback
+//CACHING STRATERGY: cache then network MIX network with cache fallback MIX cache - only
 //Intercepting all fetch requests, both from feed.js and from webpage
 self.addEventListener('fetch', function(event) {
   //[Cache then network] Fetching url from feed.js, updating new version when there is network
@@ -68,6 +69,9 @@ self.addEventListener('fetch', function(event) {
         });
       })
     );
+    //[Cache only] For the app shell, fetching from cache instead of network to save time - as app shell will be updated when new sw is installed
+  } else if (STATIC_ASSET_FILES.includes(event.request.url)) {
+    event.respondWith(caches.match(event.request.url));
   }
   //[Cache with network fallback] for other urls
   else {
