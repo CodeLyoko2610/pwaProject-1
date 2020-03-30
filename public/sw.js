@@ -1,15 +1,15 @@
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v17';
-const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v7';
+const STATIC_ASSET_VERSION = 'staticAsset-v18';
+const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v8  ';
 
 //triggered by the browser
-self.addEventListener('install', function (event) {
+self.addEventListener('install', function(event) {
   console.log('[Service Worker] Installing the service worker...', event);
 
   //Pre-Caching static assets
   //Wait untill caching is done before finishing installation SW
   event.waitUntil(
-    caches.open(STATIC_ASSET_VERSION).then(function (cache) {
+    caches.open(STATIC_ASSET_VERSION).then(function(cache) {
       console.log('[Service Worker] Pre-caching App Shell...');
       cache.addAll([
         '/',
@@ -32,16 +32,16 @@ self.addEventListener('install', function (event) {
 });
 
 //triggered by the browser
-self.addEventListener('activate', function (event) {
+self.addEventListener('activate', function(event) {
   console.log('[Service Worker] Activating the service worker...', event);
 
   //Deleting old version of sw
   event.waitUntil(
-    caches.keys().then(function (keysList) {
+    caches.keys().then(function(keysList) {
       //Execute all promises before continue
       return Promise.all(
         //Create a promises array from the string array keysList
-        keysList.map(function (key) {
+        keysList.map(function(key) {
           if (key !== STATIC_ASSET_VERSION && key !== DYNAMIC_ASSET_VERSION) {
             console.log('[Service Worker] Removing old cache...', key);
             return caches.delete(key);
@@ -56,48 +56,46 @@ self.addEventListener('activate', function (event) {
 
 //CACHING STRATERGY: cache then network MIX network with cache fallback
 //Intercepting all fetch requests, both from feed.js and from webpage
-self.addEventListener('fetch', function (event) {
+self.addEventListener('fetch', function(event) {
   //[Cache then network] Fetching url from feed.js, updating new version when there is network
   let url = 'https://httpbin.org/get';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
-      caches.open(DYNAMIC_ASSET_VERSION)
-      .then(function (cache) {
-        return fetch(event.request)
-          .then(function (response) {
-            cache.put(event.request.url, response.clone());
-            return response;
-          })
+      caches.open(DYNAMIC_ASSET_VERSION).then(function(cache) {
+        return fetch(event.request).then(function(response) {
+          cache.put(event.request.url, response.clone());
+          return response;
+        });
       })
-    )
+    );
   }
   //[Cache with network fallback] for other urls
   else {
     event.respondWith(
-      caches.match(event.request)
-      .then(function (response) {
+      caches.match(event.request).then(function(response) {
         if (response) {
           return response; //search for request in Cache and return response
         } else {
           return fetch(event.request)
-            .then(function (res) {
-              return caches.open(DYNAMIC_ASSET_VERSION)
-                .then(function (cache) {
-                  cache.put(event.request.url, res.clone());
-                  return res; //network fallback
-                })
+            .then(function(res) {
+              return caches.open(DYNAMIC_ASSET_VERSION).then(function(cache) {
+                cache.put(event.request.url, res.clone());
+                return res; //network fallback
+              });
             })
-            .catch(function (err) {
-              return caches.open(STATIC_ASSET_VERSION)
-                .then(function (cache) {
+            .catch(function(err) {
+              return caches.open(STATIC_ASSET_VERSION).then(function(cache) {
+                //Only returns offline page when requests to help page failed (other failed requests are irrelevant)
+                if (event.request.url.indexOf('/help')) {
                   return cache.match('/offline.html'); //finall cache fallback
-                })
-            })
+                }
+              });
+            });
         }
       })
-    )
+    );
   }
-})
+});
 
 //CACHING STRATERGY: network with cache fallback
 //triggered by the app itself
