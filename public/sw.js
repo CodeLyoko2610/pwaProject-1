@@ -57,13 +57,30 @@ self.addEventListener('activate', function (event) {
 
 //Helper function: check if passed string is in array
 function isInArray(string, array) {
-  for (let i = 0; i < array.Length; i++) {
-    if (string === array[i]) {
-      return true;
-    }
-    //Loop through and find nothing, return false
-    return false;
+  //VER 1:
+  // for (let i = 0; i < array.Length; i++) {
+  //   if (string === array[i]) {
+  //     return true;
+  //   }
+  //   //Loop through and find nothing, return false
+  //   return false;
+  // }
+
+  //VER 2:
+  let cachePath;
+  if (string.indexOf(self.origin) === 0) {
+    //Local urls
+    console.log('Local url: ', string);
+    cachePath = string.substring(self.origin.length); //Takes only the part after http://localhost:8080
+  } else {
+    //Foreign urls e.g. CDN
+    console.log('Foreign url: ', string);
+    cachePath = string; //Store the whole url
   }
+
+  console.log('--------------------------------------');
+  //returns Boolean value
+  return array.indexOf(cachePath) > -1;
 }
 
 //CACHING STRATERGY: cache then network MIX network with cache fallback MIX cache - only
