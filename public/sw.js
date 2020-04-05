@@ -68,18 +68,20 @@ function isInArray(string, array) {
 
   //VER 2:
   let cachePath;
-  if (string.indexOf(self.origin) === 0) {
+  if (string.indexOf(self.origin) === 0) { //self.origin = "http://localhost:8080", so local urls
     //Local urls
     console.log('Local url: ', string);
     cachePath = string.substring(self.origin.length); //Takes only the part after http://localhost:8080
+    console.log('Path: ', cachePath);
   } else {
     //Foreign urls e.g. CDN
     console.log('Foreign url: ', string);
     cachePath = string; //Store the whole url
+    console.log('Path: ', cachePath);
   }
 
   console.log('--------------------------------------');
-  //returns Boolean value
+  //returns Boolean value of if the array contains the cachePath
   return array.indexOf(cachePath) > -1;
 }
 
@@ -117,8 +119,9 @@ self.addEventListener('fetch', function (event) {
             })
             .catch(function (err) {
               return caches.open(STATIC_ASSET_VERSION).then(function (cache) {
-                //Only returns offline page when requests to help page failed (other failed requests are irrelevant)
-                if (event.request.url.indexOf('/help')) {
+                //Only returns offline page when failed requests contains the "accept" header with value 'text/html' 
+                //Meaning requests that response a html page (other failed requests with other response types (e.g: css, json) are irrelevant)
+                if (event.request.headers.get('accept').includes('text/html')) {
                   return cache.match('/offline.html'); //finall cache fallback
                 }
               });
