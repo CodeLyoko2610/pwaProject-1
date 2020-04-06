@@ -1,6 +1,6 @@
 //Version control of cache
 const STATIC_ASSET_VERSION = 'staticAsset-v20';
-const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v10  ';
+const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
   '/index.html',

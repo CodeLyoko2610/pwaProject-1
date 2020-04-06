@@ -14,7 +14,7 @@ function openCreatePostModal() {
     defferedPrompt.prompt();
 
     //Check user choice
-    defferedPrompt.userChoice.then(function(choiceResult) {
+    defferedPrompt.userChoice.then(function (choiceResult) {
       console.log(choiceResult);
 
       if (choiceResult.outcome === 'dismissed') {
@@ -104,13 +104,23 @@ function createCard() {
 //   })
 
 //CACHING STRATERGY: cache then network
-let url = 'https:/httpbin.org/get';
+// let url = 'https:/httpbin.org/get';
+let url = 'https:/httpbin.org/post'; //Using POST request for testing
 let networkDataReceived = false;
 
 //1.1  Load from network
 //aka loading newest version
-fetch(url)
-  .then(function(res) {
+fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      message: 'Some message here.'
+    })
+  })
+  .then(function (res) {
     return res.json();
   })
   .then(data => {
@@ -124,13 +134,13 @@ fetch(url)
 if ('caches' in window) {
   caches
     .match(url)
-    .then(function(response) {
+    .then(function (response) {
       //Only if there is a response / request-response is cached
       if (response) {
         return response.json();
       }
     })
-    .then(function(data) {
+    .then(function (data) {
       //Only load from cache if cannot get from network (newest version)
       if (!networkDataReceived) {
         console.log('From cache: ', data);
