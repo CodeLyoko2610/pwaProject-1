@@ -72,17 +72,32 @@ function isInArray(string, array) {
     //Local urls
     console.log('Local url: ', string);
     cachePath = string.substring(self.origin.length); //Takes only the part after http://localhost:8080
-    console.log('Path: ', cachePath);
+    //console.log('Path: ', cachePath);
   } else {
     //Foreign urls e.g. CDN
     console.log('Foreign url: ', string);
     cachePath = string; //Store the whole url
-    console.log('Path: ', cachePath);
+    //console.log('Path: ', cachePath);
   }
 
-  console.log('--------------------------------------');
+  //console.log('--------------------------------------');
   //returns Boolean value of if the array contains the cachePath
   return array.indexOf(cachePath) > -1;
+}
+
+//Helper function: trimming cache storage
+//Where to call currently: in every fetch requests, right before caching new data
+function trimCache(cacheName, maxItemsInCache) {
+  caches.open(cacheName)
+    .then(function (cache) {
+      return cache.keys()
+        .then(function (keys) {
+          if (keys.length > maxItemsInCache) {
+            cache.delete(keys[0]) //Delete the first item, no need to returns, as the returned value is just Boolean values  
+              .then(trimCache(cacheName, maxItemsInCache)); //Call itself and start trimming again
+          }
+        })
+    })
 }
 
 //CACHING STRATERGY: cache then network MIX network with cache fallback MIX cache - only
@@ -94,6 +109,7 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(
       caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
         return fetch(event.request).then(function (response) {
+          trimCache(DYNAMIC_ASSET_VERSION, 3);
           cache.put(event.request.url, response.clone());
           return response;
         });
@@ -113,6 +129,7 @@ self.addEventListener('fetch', function (event) {
           return fetch(event.request)
             .then(function (res) {
               return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
+                trimCache(DYNAMIC_ASSET_VERSION, 3);
                 cache.put(event.request.url, res.clone());
                 return res; //network fallback
               });
