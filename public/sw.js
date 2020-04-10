@@ -123,12 +123,30 @@ self.addEventListener('fetch', function (event) {
   let url = 'https://pwagramproject-1.firebaseio.com/posts';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
-      caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
-        return fetch(event.request).then(function (response) {
-          //trimCache(DYNAMIC_ASSET_VERSION, 3);
-          cache.put(event.request.url, response.clone());
-          return response;
-        });
+      fetch(event.request)
+      .then(function (response) {
+        let clonedRes = response.clone();
+
+        //Pull out part of the response and store in indexed db
+        clonedRes.json()
+          .then(function (data) {
+            for (let item in data) {
+              //Open / Create store in idb
+              idbPromise
+                .then(function (db) {
+                  //Set transaction
+                  let tx = db.transaction('posts', 'readwrite');
+                  //Open the store using the transaction
+                  let store = tx.objectStore('posts');
+                  //Put data into the store
+                  store.put(data[item]);
+                  //Close the transaction
+                  return tx.complete; //complete is a property, not a method
+                })
+            }
+          })
+
+        return response;
       })
     );
     //[Cache only] For the app shell, fetching from cache instead of network to save time - as app shell will be updated when new sw is installed

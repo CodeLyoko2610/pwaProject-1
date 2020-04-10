@@ -168,7 +168,7 @@ if ('caches' in window) {
         let dataArray = [];
         for (let item in data) {
           dataArray.push(data[item]);
-          //Structure of data received {post: {{item1}, {item2}, {item3}}} / key(post)-values(items)
+          //Structure of data received {posts: {post1:{item1}, post2:{item2}, post3:{item3}}} / key(post1,2,3...)-values(item1,2,3...)
           //Create the array with only the items
         }
 
