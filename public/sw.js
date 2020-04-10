@@ -1,5 +1,19 @@
+//Import scripts
+importScripts('/src/js/idb.js');
+
+//Open indexedDB, store the returned promise for later use
+let idbPromise = idb.open('posts-store', 1, function (db) {
+  if (!db.objectStoreNames.contains('posts')) {
+    //If not yet created, create the store (aka table)
+    //Passed Option: primary key is the id - for later query
+    db.createObjectStore('posts', {
+      keyPath: 'id'
+    })
+  }
+})
+
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v23';
+const STATIC_ASSET_VERSION = 'staticAsset-v24';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
@@ -7,6 +21,7 @@ const STATIC_ASSET_FILES = [
   '/offline.html',
   '/src/js/app.js',
   '/src/js/feed.js',
+  '/src/js/idb.js',
   '/src/js/polyfills/fetch.js',
   '/src/js/polyfills/promise.js',
   '/src/js/material.min.js',
