@@ -68,26 +68,26 @@ function clearCards() {
   }
 }
 
-function createCard() {
+function createCard(dataItem) {
   let cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
 
   let cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = 'url(' + dataItem.image + ')';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
 
   let cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = dataItem.title;
   cardTitleTextElement.style.color = 'white';
   cardTitle.appendChild(cardTitleTextElement);
 
   let cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = dataItem.location;
   cardSupportingText.style.textAlign = 'center';
 
   // let cardSaveButton = document.createElement('button');
@@ -103,6 +103,14 @@ function createCard() {
   console.log('Card created.');
 }
 
+function updateUI(dataArray) {
+  clearCards(); //Remove existing versions
+
+  for (let i = 0; i < dataArray.length; i++) {
+    createCard(dataArray[i]);
+  }
+}
+
 //Reach url endpoint, send back dummy response and create card
 // fetch('https:/httpbin.org/get')
 //   .then(function (res) {
@@ -115,29 +123,30 @@ function createCard() {
 
 //CACHING STRATERGY: cache then network
 // let url = 'https:/httpbin.org/get';
-let url = 'https:/httpbin.org/post'; //Using POST request for testing
+let url = 'https://pwagramproject-1.firebaseio.com/posts.json'; //Remember to add .json [firebase requirements]
 let networkDataReceived = false;
 
 //1.1  Load from network
 //aka loading newest version
-fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'Some message here.'
-    })
-  })
+fetch(url)
   .then(function (res) {
     return res.json();
   })
   .then(data => {
     networkDataReceived = true;
     console.log('From network: ', data);
-    clearCards(); //Remove existing versions
-    createCard(); //With network version (updated version)
+
+    //Change object received as data to array
+    let dataArray = [];
+    for (let item in data) {
+      dataArray.push(data[item]);
+      //Structure of data received {post: {{item1}, {item2}, {item3}}} / key(post)-values(items)
+      //Create the array with only the items
+    }
+
+    console.log(dataArray);
+
+    updateUI(dataArray); //With network version (updated version)
   });
 
 //1. Load from cache
@@ -154,8 +163,16 @@ if ('caches' in window) {
       //Only load from cache if cannot get from network (newest version)
       if (!networkDataReceived) {
         console.log('From cache: ', data);
-        clearCards(); //Remove existing version
-        createCard(); //with cached version
+
+        //Change object received as data to array
+        let dataArray = [];
+        for (let item in data) {
+          dataArray.push(data[item]);
+          //Structure of data received {post: {{item1}, {item2}, {item3}}} / key(post)-values(items)
+          //Create the array with only the items
+        }
+
+        updateUI(dataArray); //with cached version
       }
     });
 }

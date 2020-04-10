@@ -68,14 +68,15 @@ function isInArray(string, array) {
 
   //VER 2:
   let cachePath;
-  if (string.indexOf(self.origin) === 0) { //self.origin = "http://localhost:8080", so local urls
+  if (string.indexOf(self.origin) === 0) {
+    //self.origin = "http://localhost:8080", so local urls
     //Local urls
-    console.log('Local url: ', string);
+    //console.log('Local url: ', string);
     cachePath = string.substring(self.origin.length); //Takes only the part after http://localhost:8080
     //console.log('Path: ', cachePath);
   } else {
     //Foreign urls e.g. CDN
-    console.log('Foreign url: ', string);
+    //console.log('Foreign url: ', string);
     cachePath = string; //Store the whole url
     //console.log('Path: ', cachePath);
   }
@@ -87,29 +88,29 @@ function isInArray(string, array) {
 
 //Helper function: trimming cache storage
 //Where to call currently: in every fetch requests, right before caching new data
-function trimCache(cacheName, maxItemsInCache) {
-  caches.open(cacheName)
-    .then(function (cache) {
-      return cache.keys()
-        .then(function (keys) {
-          if (keys.length > maxItemsInCache) {
-            cache.delete(keys[0]) //Delete the first item, no need to returns, as the returned value is just Boolean values  
-              .then(trimCache(cacheName, maxItemsInCache)); //Call itself and start trimming again
-          }
-        })
-    })
-}
+// function trimCache(cacheName, maxItemsInCache) {
+//   caches.open(cacheName)
+//     .then(function (cache) {
+//       return cache.keys()
+//         .then(function (keys) {
+//           if (keys.length > maxItemsInCache) {
+//             cache.delete(keys[0]) //Delete the first item, no need to returns, as the returned value is just Boolean values
+//               .then(trimCache(cacheName, maxItemsInCache)); //Call itself and start trimming again
+//           }
+//         })
+//     })
+// }
 
 //CACHING STRATERGY: cache then network MIX network with cache fallback MIX cache - only
 //Intercepting all fetch requests, both from feed.js and from webpage
 self.addEventListener('fetch', function (event) {
   //[Cache then network] Fetching url from feed.js, updating new version when there is network
-  let url = 'https://httpbin.org/get';
+  let url = 'https://pwagramproject-1.firebaseio.com/posts';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
       caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
         return fetch(event.request).then(function (response) {
-          trimCache(DYNAMIC_ASSET_VERSION, 3);
+          //trimCache(DYNAMIC_ASSET_VERSION, 3);
           cache.put(event.request.url, response.clone());
           return response;
         });
@@ -129,14 +130,14 @@ self.addEventListener('fetch', function (event) {
           return fetch(event.request)
             .then(function (res) {
               return caches.open(DYNAMIC_ASSET_VERSION).then(function (cache) {
-                trimCache(DYNAMIC_ASSET_VERSION, 3);
+                //trimCache(DYNAMIC_ASSET_VERSION, 3);
                 cache.put(event.request.url, res.clone());
                 return res; //network fallback
               });
             })
             .catch(function (err) {
               return caches.open(STATIC_ASSET_VERSION).then(function (cache) {
-                //Only returns offline page when failed requests contains the "accept" header with value 'text/html' 
+                //Only returns offline page when failed requests contains the "accept" header with value 'text/html'
                 //Meaning requests that response a html page (other failed requests with other response types (e.g: css, json) are irrelevant)
                 if (event.request.headers.get('accept').includes('text/html')) {
                   return cache.match('/offline.html'); //finall cache fallback
