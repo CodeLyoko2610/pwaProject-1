@@ -140,39 +140,47 @@ fetch(url)
     let dataArray = [];
     for (let item in data) {
       dataArray.push(data[item]);
-      //Structure of data received {post: {{item1}, {item2}, {item3}}} / key(post)-values(items)
+      //Structure of data received {posts: {post1:{item1}, post2:{item2}, post3:{item3}}} / key(post1,2,3...)-values(item1,2,3...)
       //Create the array with only the items
     }
-
-    console.log(dataArray);
 
     updateUI(dataArray); //With network version (updated version)
   });
 
 //1. Load from cache
-if ('caches' in window) {
-  caches
-    .match(url)
-    .then(function (response) {
-      //Only if there is a response / request-response is cached
-      if (response) {
-        return response.json();
+if ('indexedDB' in window) {
+  readAllData('posts')
+    .then(function (cachedData) {
+      //Only use cache if cannot get res from network
+      if (!networkDataReceived) {
+        console.log('From cache: ', cachedData);
+
+        //the objects received is put into an array, no need to convert to array 
+        updateUI(cachedData); //With cached version
       }
     })
-    .then(function (data) {
-      //Only load from cache if cannot get from network (newest version)
-      if (!networkDataReceived) {
-        console.log('From cache: ', data);
+  // caches
+  //   .match(url)
+  //   .then(function (response) {
+  //     //Only if there is a response / request-response is cached
+  //     if (response) {
+  //       return response.json();
+  //     }
+  //   })
+  //   .then(function (data) {
+  //     //Only load from cache if cannot get from network (newest version)
+  //     if (!networkDataReceived) {
+  //       console.log('From cache: ', data);
 
-        //Change object received as data to array
-        let dataArray = [];
-        for (let item in data) {
-          dataArray.push(data[item]);
-          //Structure of data received {posts: {post1:{item1}, post2:{item2}, post3:{item3}}} / key(post1,2,3...)-values(item1,2,3...)
-          //Create the array with only the items
-        }
+  //       //Change object received as data to array
+  //       let dataArray = [];
+  //       for (let item in data) {
+  //         dataArray.push(data[item]);
+  //         //Structure of data received {posts: {post1:{item1}, post2:{item2}, post3:{item3}}} / key(post1,2,3...)-values(item1,2,3...)
+  //         //Create the array with only the items
+  //       }
 
-        updateUI(dataArray); //with cached version
-      }
-    });
+  //       updateUI(dataArray); //with cached version
+  //     }
+  //   });
 }

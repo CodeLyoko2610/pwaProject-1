@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/idbUtilities.js');
 
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v24';
+const STATIC_ASSET_VERSION = 'staticAsset-v25';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
