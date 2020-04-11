@@ -36,3 +36,17 @@ function readAllData(storeName) {
             return store.getAll();
         })
 }
+
+//Delete all data in db
+function clearAllData(storeName) {
+    return idbPromise
+        .then(function (db) {
+            let tx = db.transaction(storeName, 'readwrite');
+            let store = tx.objectStore(storeName);
+
+
+            store.clear();
+            //Clear the store, return promise when successfully finish the process
+            return tx.complete;
+        })
+}

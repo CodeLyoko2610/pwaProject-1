@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/idbUtilities.js');
 
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v25';
+const STATIC_ASSET_VERSION = 'staticAsset-v26';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
@@ -117,14 +117,18 @@ self.addEventListener('fetch', function (event) {
       .then(function (response) {
         let clonedRes = response.clone();
 
-        //Pull out part of the response and store in indexed db
-        clonedRes.json()
+        //Clear all data in indexedDB before writing new one
+        clearAllData('posts')
+          .then(function () {
+            //No need for argument, because we dont use the returned promise
+            //Pull out part of the response and store in indexed db
+            return clonedRes.json();
+          })
           .then(function (data) {
             for (let item in data) {
               writeData('posts', data[item]);
             }
           })
-
         return response;
       })
     );
