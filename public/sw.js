@@ -125,8 +125,10 @@ self.addEventListener('fetch', function (event) {
             return clonedRes.json();
           })
           .then(function (data) {
+            //data in key-value pair 
+            //item is the post (key)
             for (let item in data) {
-              writeData('posts', data[item]);
+              writeData('posts', data[item])
             }
           })
         return response;

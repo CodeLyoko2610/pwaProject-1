@@ -50,3 +50,19 @@ function clearAllData(storeName) {
             return tx.complete;
         })
 }
+
+//Delete single item
+function deleteSingleItem(storeName, itemId) {
+    idbPromise
+        .then(function (db) {
+            let tx = db.transaction(storeName, 'readwrite');
+            let store = tx.objectStore(storeName);
+
+            store.delete(itemId);
+            return tx.complete;
+        })
+        //Handle the promise right here, no need for "return idbPromise"
+        .then(function (something) {
+            console.log('Item deleted.');
+        })
+}
