@@ -18,7 +18,21 @@ function writeData(storeName, data) {
             //Put data in
             store.put(data);
 
-            //Close transaction with "done" promise
+            //Return a promise
+            //Close transaction only when successful
             return tx.complete;
+        })
+}
+
+//Read data in db
+function readAllData(storeName) {
+    return idbPromise
+        .then(function (db) {
+            let tx = db.transaction(storeName, 'readonly');
+            let store = tx.objectStore(storeName);
+
+            //Read data and return data, null is returned if failed
+            //No need to indicate transaction succeed with tx.complete, as no change to db made
+            return store.getAll();
         })
 }
