@@ -1,16 +1,6 @@
 //Import scripts
 importScripts('/src/js/idb.js');
-
-//Open indexedDB, store the returned promise for later use
-let idbPromise = idb.open('posts-store', 1, function (db) {
-  if (!db.objectStoreNames.contains('posts')) {
-    //If not yet created, create the store (aka table)
-    //Passed Option: primary key is the id - for later query
-    db.createObjectStore('posts', {
-      keyPath: 'id'
-    })
-  }
-})
+importScripts('/src/js/idbUtilities.js');
 
 //Version control of cache
 const STATIC_ASSET_VERSION = 'staticAsset-v24';
@@ -131,18 +121,7 @@ self.addEventListener('fetch', function (event) {
         clonedRes.json()
           .then(function (data) {
             for (let item in data) {
-              //Open / Create store in idb
-              idbPromise
-                .then(function (db) {
-                  //Set transaction
-                  let tx = db.transaction('posts', 'readwrite');
-                  //Open the store using the transaction
-                  let store = tx.objectStore('posts');
-                  //Put data into the store
-                  store.put(data[item]);
-                  //Close the transaction
-                  return tx.complete; //complete is a property, not a method
-                })
+              writeData('posts', data[item]);
             }
           })
 
