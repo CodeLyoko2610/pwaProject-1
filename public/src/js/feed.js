@@ -76,7 +76,11 @@ function createCard(dataItem) {
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = 'url(' + dataItem.image + ')';
   cardTitle.style.backgroundSize = 'cover';
+  cardTitle.style.backgroundPosition = 'center';
   cardWrapper.appendChild(cardTitle);
+
+  //Extra styling for the card
+  // cardTitle.classList.add('my-card-css');
 
   let cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';

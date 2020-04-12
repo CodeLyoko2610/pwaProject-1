@@ -70,3 +70,25 @@
     height: 200px;
   }
 }
+
+/* MY-CARD-CSS */
+/* ----------------------SETTING HEIGHT-------------------- */
+/* .shared-moment-card .my-card-css {
+  height: 250px;
+}
+
+/* For larger devices with at least 600px height */
+@media(min-height: 700px) {
+  .shared-moment-card .my-card-css {
+    height: 300px;
+  }
+}
+
+/* For larger devices with at least 1000px height */
+@media(min-height: 1000px) {
+  .shared-moment-card .my-card-css {
+    height: 380px;
+  }
+}
+
+*/
