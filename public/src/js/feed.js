@@ -135,7 +135,7 @@ fetch(url)
   .then(function (res) {
     return res.json();
   })
-  .then(data => {
+  .then((data) => {
     networkDataReceived = true;
     console.log('From network: ', data);
 
@@ -152,16 +152,15 @@ fetch(url)
 
 //1. Load from cache
 if ('indexedDB' in window) {
-  readAllData('posts')
-    .then(function (cachedData) {
-      //Only use cache if cannot get res from network
-      if (!networkDataReceived) {
-        console.log('From cache: ', cachedData);
+  readAllData('posts').then(function (cachedData) {
+    //Only use cache if cannot get res from network
+    if (!networkDataReceived) {
+      console.log('From cache: ', cachedData);
 
-        //the objects received is put into an array, no need to convert to array 
-        updateUI(cachedData); //With cached version
-      }
-    })
+      //the objects received is put into an array, no need to convert to array
+      updateUI(cachedData); //With cached version
+    }
+  });
   // caches
   //   .match(url)
   //   .then(function (response) {
