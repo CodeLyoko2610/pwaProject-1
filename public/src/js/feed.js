@@ -7,8 +7,8 @@ let sharedMomentsArea = document.querySelector('#shared-moments');
 
 //Criteria for PWA installation
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
-
+  //createPostArea.style.display = 'block';
+  createPostArea.style.transform = 'translateY(0vh)';
   if (defferedPrompt) {
     //Show the prompt stored from earlier
     defferedPrompt.prompt();
@@ -40,7 +40,8 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  // createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);

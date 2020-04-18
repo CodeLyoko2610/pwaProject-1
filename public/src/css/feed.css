@@ -8,7 +8,11 @@
   top: 56px;
   background: white;
   text-align: center;
-  display: none;
+  /* display: block; */
+  transform: translateY(
+    100vh
+  ); /*Display at point 100% of the viewport height aka push the whole thing down*/
+  transition: transform 0.3s;
 }
 
 .main-image {
@@ -39,16 +43,16 @@
 }
 
 /* For larger devices with at least 600px width */
-@media(min-width: 600px) {
+@media (min-width: 600px) {
   .shared-moment-card.mdl-card {
-    width: 60%
+    width: 60%;
   }
 }
 
 /* For larger devices with at least 1000px width */
-@media(min-width: 1000px) {
+@media (min-width: 1000px) {
   .shared-moment-card.mdl-card {
-    width: 45%
+    width: 45%;
   }
 }
 
@@ -58,14 +62,14 @@
 }
 
 /* For larger devices with at least 600px height */
-@media(min-height: 700px) {
+@media (min-height: 700px) {
   .shared-moment-card .mdl-card__title {
     height: 160px;
   }
 }
 
 /* For larger devices with at least 1000px height */
-@media(min-height: 1000px) {
+@media (min-height: 1000px) {
   .shared-moment-card .mdl-card__title {
     height: 200px;
   }
@@ -78,14 +82,14 @@
 }
 
 /* For larger devices with at least 600px height */
-@media(min-height: 700px) {
+@media (min-height: 700px) {
   .shared-moment-card .my-card-css {
     height: 300px;
   }
 }
 
 /* For larger devices with at least 1000px height */
-@media(min-height: 1000px) {
+@media (min-height: 1000px) {
   .shared-moment-card .my-card-css {
     height: 380px;
   }
