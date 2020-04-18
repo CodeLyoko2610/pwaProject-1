@@ -4,6 +4,9 @@ let closeCreatePostModalButton = document.querySelector(
   '#close-create-post-modal-btn'
 );
 let sharedMomentsArea = document.querySelector('#shared-moments');
+let form = document.querySelector('form');
+let titleInput = document.querySelector('#title');
+let locationInput = document.querySelector('#location');
 
 //Criteria for PWA installation
 function openCreatePostModal() {
@@ -48,8 +51,29 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
+//Submit new post and Background sync--------------------------------
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  //1.Check if there are data to submit
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please input valid data to post!');
+    return; //end process by return nothing
+  }
+
+  //2. Close the modal
+  closeCreatePostModal();
+
+  //3. Register sync task
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready()
+      .then(function (sw) {
+        sw.sync.register('sync-new-post');
+      })
+  }
+})
 // function onSaveButtonClicked() {
-//   console.log('Save button clicked.');
+//   console.log('Save bu tton clicked.');
 
 //   //Accesing cache, store user-requested assets
 //   //Checking if cache API is supported. If not, do nothing.

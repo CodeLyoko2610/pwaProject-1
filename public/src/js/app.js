@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
       console.log('Service worker is registered.');
     })
     .catch(function (err) {
-      console.log(err);
+      console.log('[app.js] ' + err);
     });
 }
 
