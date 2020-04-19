@@ -4,9 +4,14 @@ let closeCreatePostModalButton = document.querySelector(
   '#close-create-post-modal-btn'
 );
 let sharedMomentsArea = document.querySelector('#shared-moments');
+
+//Create new post
 let form = document.querySelector('form');
 let titleInput = document.querySelector('#title');
 let locationInput = document.querySelector('#location');
+
+//sync-posts toast
+let snackbarContainer = document.querySelector('#confirmation-toast');
 
 //Criteria for PWA installation
 function openCreatePostModal() {
@@ -66,9 +71,32 @@ form.addEventListener('submit', function (e) {
 
   //3. Register sync task
   if ('serviceWorker' in navigator && 'SyncManager' in window) {
-    navigator.serviceWorker.ready()
+    navigator.serviceWorker.ready
       .then(function (sw) {
-        sw.sync.register('sync-new-post');
+        //3.1 Create data obj
+        let data = {
+
+          id: new Date().toISOString(), // to create a unique id
+          title: titleInput.value,
+          location: locationInput.value
+        }
+
+        //3.2 Write data into indexedDB
+        writeData('sync-posts', data)
+          .then(function () {
+            //3.2.1 Only register the sync task if sucessfully write data to indexedDB
+            return sw.sync.register('sync-new-post');
+          })
+          //3.2.2 [Optional] Show a noti
+          .then(function () {
+            snackbarContainer.MaterialSnackbar.showSnackbar({
+              message: 'Your post has been saved for syncing.'
+            })
+          })
+          //Catch errors
+          .catch(function (err) {
+            console.error('[feed.js] Syncing failed: ', err)
+          })
       })
   }
 })
