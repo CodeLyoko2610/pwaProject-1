@@ -57,6 +57,29 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
 //Submit new post and Background sync--------------------------------
+//let url = 'https://pwagramproject-1.firebaseio.com/posts.json';
+
+//Fallback for background sync
+function sendData() {
+  fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        id: new Date().toISOString(),
+        title: titleInput.value,
+        location: locationInput.value,
+        image: 'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/arietty.jpg?alt=media&token=706bc0f2-594e-4ca0-83b8-03307b5d08a2'
+      })
+    })
+    .then(function (res) {
+      console.log('Sent data: ', res);
+      updateUI();
+    })
+}
+
 form.addEventListener('submit', function (e) {
   e.preventDefault();
 
@@ -98,8 +121,12 @@ form.addEventListener('submit', function (e) {
             console.error('[feed.js] Syncing failed: ', err)
           })
       })
+  } else {
+    //Fallback if browser does not support syncManager
+    sendData();
   }
 })
+
 // function onSaveButtonClicked() {
 //   console.log('Save bu tton clicked.');
 
