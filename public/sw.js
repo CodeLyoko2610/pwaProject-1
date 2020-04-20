@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/idbUtilities.js');
 
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v31';
+const STATIC_ASSET_VERSION = 'staticAsset-v33';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
@@ -110,7 +110,7 @@ function isInArray(string, array) {
 //Intercepting all fetch requests, both from feed.js and from webpage
 self.addEventListener('fetch', function (event) {
   //[Cache then network] Fetching url from feed.js, updating new version when there is network
-  let url = 'https://pwagramproject-1.firebaseio.com/posts';
+  let url = 'https://pwagramproject-1.firebaseio.com/posts.json';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
       fetch(event.request)
@@ -237,3 +237,47 @@ self.addEventListener('fetch', function (event) {
 //         fetch(event.request)
 //     )
 // })
+
+//BACKGROUND SYNCING------------------------------------------------
+//Sync event fires when sw recognizes connectiviy after a sync task is registered
+self.addEventListener('sync', function (event) {
+  console.log('[Service Worker] Background syncing');
+
+  //Check if sync task with tag sync new post
+  if (event.tag === 'sync-new-post') {
+    console.log('[Service Worker] Syncing new posts...');
+
+    event.waitUntil(
+      readAllData('sync-posts')
+      .then(function (postsToSync) {
+        //Send request for each post in the store
+        for (let post of postsToSync) {
+          fetch('https://pwagramproject-1.firebaseio.com/posts.json', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: post.id,
+                title: post.title,
+                location: post.location,
+                image: 'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/arietty.jpg?alt=media&token=706bc0f2-594e-4ca0-83b8-03307b5d08a2'
+              })
+            })
+            .then(function (res) {
+              console.log('[Service Worker] Sent data ', res);
+
+              //Delete the post in sync-posts storage if the res code is 200
+              if (res.ok) {
+                deleteSingleItem('sync-posts', post.id); //!!NOT WORKING CORRECTLY
+              }
+            })
+            .catch(function (error) {
+              console.log('[Service Worker] Error while sending data.', error);
+            })
+        }
+      })
+    );
+  }
+})

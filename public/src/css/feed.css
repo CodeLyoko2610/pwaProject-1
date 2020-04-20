@@ -9,9 +9,8 @@
   background: white;
   text-align: center;
   /* display: block; */
-  transform: translateY(
-    100vh
-  ); /*Display at point 100% of the viewport height aka push the whole thing down*/
+  transform: translateY(100vh);
+  /*Display at point 100% of the viewport height aka push the whole thing down*/
   transition: transform 0.3s;
 }
 
