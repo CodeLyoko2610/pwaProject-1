@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/idbUtilities.js');
 
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v33';
+const STATIC_ASSET_VERSION = 'staticAsset-v35';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
@@ -252,7 +252,7 @@ self.addEventListener('sync', function (event) {
       .then(function (postsToSync) {
         //Send request for each post in the store
         for (let post of postsToSync) {
-          fetch('https://pwagramproject-1.firebaseio.com/posts.json', {
+          fetch('https://us-central1-pwagramproject-1.cloudfunctions.net/storePostData', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -270,7 +270,10 @@ self.addEventListener('sync', function (event) {
 
               //Delete the post in sync-posts storage if the res code is 200
               if (res.ok) {
-                deleteSingleItem('sync-posts', post.id); //!!NOT WORKING CORRECTLY
+                res.json()
+                  .then(function (resData) {
+                    deleteSingleItem('sync-posts', resData.id);
+                  })
               }
             })
             .catch(function (error) {
