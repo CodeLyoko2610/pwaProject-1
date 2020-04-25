@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/idbUtilities.js');
 
 //Version control of cache
-const STATIC_ASSET_VERSION = 'staticAsset-v35';
+const STATIC_ASSET_VERSION = 'staticAsset-v31';
 const DYNAMIC_ASSET_VERSION = 'dynamicAsset-v12';
 const STATIC_ASSET_FILES = [
   '/',
@@ -110,7 +110,7 @@ function isInArray(string, array) {
 //Intercepting all fetch requests, both from feed.js and from webpage
 self.addEventListener('fetch', function (event) {
   //[Cache then network] Fetching url from feed.js, updating new version when there is network
-  let url = 'https://pwagramproject-1.firebaseio.com/posts.json';
+  let url = 'https://pwagramproject-1.firebaseio.com/posts';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
       fetch(event.request)
