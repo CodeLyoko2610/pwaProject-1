@@ -113,8 +113,7 @@ self.addEventListener('fetch', function (event) {
   let url = 'https://pwagramproject-1.firebaseio.com/posts.json';
   if (event.request.url.indexOf(url) > -1) {
     event.respondWith(
-      fetch(event.request)
-      .then(function (response) {
+      fetch(event.request).then(function (response) {
         let clonedRes = response.clone();
 
         //Clear all data in indexedDB before writing new one
@@ -125,12 +124,12 @@ self.addEventListener('fetch', function (event) {
             return clonedRes.json();
           })
           .then(function (data) {
-            //data in key-value pair 
+            //data in key-value pair
             //item is the post (key)
             for (let item in data) {
-              writeData('posts', data[item])
+              writeData('posts', data[item]);
             }
-          })
+          });
         return response;
       })
     );
@@ -248,23 +247,23 @@ self.addEventListener('sync', function (event) {
     console.log('[Service Worker] Syncing new posts...');
 
     event.waitUntil(
-      readAllData('sync-posts')
-      .then(function (postsToSync) {
+      readAllData('sync-posts').then(function (postsToSync) {
         //Send request for each post in the store
         for (let post of postsToSync) {
           fetch('https://pwagramproject-1.firebaseio.com/posts.json', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify({
-                id: post.id,
-                title: post.title,
-                location: post.location,
-                image: 'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/arietty.jpg?alt=media&token=706bc0f2-594e-4ca0-83b8-03307b5d08a2'
-              })
-            })
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            body: JSON.stringify({
+              id: post.id,
+              title: post.title,
+              location: post.location,
+              image:
+                'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/arietty.jpg?alt=media&token=706bc0f2-594e-4ca0-83b8-03307b5d08a2',
+            }),
+          })
             .then(function (res) {
               console.log('[Service Worker] Sent data ', res);
 
@@ -275,9 +274,11 @@ self.addEventListener('sync', function (event) {
             })
             .catch(function (error) {
               console.log('[Service Worker] Error while sending data.', error);
-            })
+            });
         }
       })
     );
   }
-})
+});
+
+//Just a test
