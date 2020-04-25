@@ -237,5 +237,3 @@ self.addEventListener('fetch', function (event) {
 //     )
 // })
 // })
-
-//testing
