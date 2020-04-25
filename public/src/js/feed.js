@@ -61,7 +61,7 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
 //Fallback for background sync
 function sendData() {
-  fetch(url, {
+  fetch('https://us-central1-pwagramproject-1.cloudfunctions.net/storePostData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
