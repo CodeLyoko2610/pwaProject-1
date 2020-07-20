@@ -56,12 +56,10 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
-//Submit new post and Background sync--------------------------------
-//let url = 'https://pwagramproject-1.firebaseio.com/posts.json';
-
 //Fallback for background sync
-function sendData() {
-  fetch('https://us-central1-pwagramproject-1.cloudfunctions.net/storePostData', {
+const sendData  = async () =>{
+  try {
+    await fetch('https://pwagramproject-1.firebaseio.com/posts.json', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,15 +69,17 @@ function sendData() {
         id: new Date().toISOString(),
         title: titleInput.value,
         location: locationInput.value,
-        image: 'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/arietty.jpg?alt=media&token=706bc0f2-594e-4ca0-83b8-03307b5d08a2'
+        image: 'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/IMG_7140.JPG?alt=media&token=77d22063-5de1-43cc-a5c0-75eed8dae645'
       })
     })
-    .then(function (res) {
-      console.log('Sent data: ', res);
-      updateUI();
-    })
+
+    await fetchUpdatedCards()
+  } catch (error) {
+    console.log('Errors happened.', error)
+  }  
 }
 
+//Add event listener for background synchronization
 form.addEventListener('submit', function (e) {
   e.preventDefault();
 
@@ -93,55 +93,38 @@ form.addEventListener('submit', function (e) {
   closeCreatePostModal();
 
   //3. Register sync task
-  if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  if('serviceWorker' in navigator && 'SyncManager' in window){
     navigator.serviceWorker.ready
-      .then(function (sw) {
-        //3.1 Create data obj
-        let data = {
-
-          id: new Date().toISOString(), // to create a unique id
+      .then(sw => {
+        let post = {
+          id:  new Date().toISOString(),
           title: titleInput.value,
           location: locationInput.value
-        }
+        };
 
-        //3.2 Write data into indexedDB
-        writeData('sync-posts', data)
-          .then(function () {
-            //3.2.1 Only register the sync task if sucessfully write data to indexedDB
-            return sw.sync.register('sync-new-post');
+        //Utils function in idbUtilities.js
+        writeData('sync-posts', post)
+          .then( () => {            
+            return sw.sync.register('sync-new-posts');
           })
-          //3.2.2 [Optional] Show a noti
-          .then(function () {
-            snackbarContainer.MaterialSnackbar.showSnackbar({
-              message: 'Your post has been saved for syncing.'
-            })
+          .then(() => {
+            let snackbarContainer = document.querySelector('#confirmation-toast')
+    
+            let data = {message: 'Your Post saved for syncing.'}
+    
+            snackbarContainer.MaterialSnackbar.showSnackbar(data)
           })
-          //Catch errors
-          .catch(function (err) {
-            console.error('[feed.js] Syncing failed: ', err)
-          })
-      })
+          .catch(err => {
+            console.error('Error while syncing post.', err)
+          })  
+      })          
   } else {
-    //Fallback if browser does not support syncManager
-    sendData();
+    sendData()
   }
-})
+}
+)
 
-// function onSaveButtonClicked() {
-//   console.log('Save bu tton clicked.');
-
-//   //Accesing cache, store user-requested assets
-//   //Checking if cache API is supported. If not, do nothing.
-//   if ('caches' in window) {
-//     caches.open('userRequestedAssets')
-//       .then(function (cache) {
-//         cache.add('https:/httpbin.org/get');
-//         cache.add('/src/images/sf-boat.jpg');
-//       })
-//   }
-// }
-
-//Clear all existing cards
+//Helper functions
 function clearCards() {
   while (sharedMomentsArea.hasChildNodes()) {
     sharedMomentsArea.removeChild(sharedMomentsArea.lastChild); //Delete one child per iteration / loop
@@ -186,27 +169,29 @@ function createCard(dataItem) {
   console.log('Card created.');
 }
 
+async function fetchUpdatedCards(){
+  const res = await fetch('https://pwagramproject-1.firebaseio.com/posts.json')
+  const data = await res.json()
+
+  //Change data to array
+  let dataArr = []
+  for(item in data){
+    dataArr.push(data[item])
+  }
+
+  updateUI(dataArr)
+}
+
 function updateUI(dataArray) {
   clearCards(); //Remove existing versions
-
+  console.log('Cards cleared.')
   for (let i = 0; i < dataArray.length; i++) {
     createCard(dataArray[i]);
   }
 }
 
-//Reach url endpoint, send back dummy response and create card
-// fetch('https:/httpbin.org/get')
-//   .then(function (res) {
-//     return res.json();
-//   })
-//   .then(() => {
-//     console.log('Creating new card...');
-//     createCard();
-//   })
-
 //CACHING STRATERGY: cache then network
-// let url = 'https:/httpbin.org/get';
-let url = 'https://pwagramproject-1.firebaseio.com/posts.json'; //Remember to add .json [firebase requirements]
+let url = 'https://pwagramproject-1.firebaseio.com/posts.json';
 let networkDataReceived = false;
 
 //1.1  Load from network
@@ -223,8 +208,9 @@ fetch(url)
     let dataArray = [];
     for (let item in data) {
       dataArray.push(data[item]);
-      //Structure of data received {posts: {post1:{item1}, post2:{item2}, post3:{item3}}} / key(post1,2,3...)-values(item1,2,3...)
-      //Create the array with only the items
+      //Structure of data received from Firebase
+      //{posts: {item1:{post1}, item2:{post2}, item3:{post3}}} 
+      // key(item1,2,3...) - values(post,2,3...)            
     }
 
     updateUI(dataArray); //With network version (updated version)
@@ -232,37 +218,14 @@ fetch(url)
 
 //1. Load from cache
 if ('indexedDB' in window) {
-  readAllData('posts').then(function (cachedData) {
+  readAllData('posts')
+    .then(function (cachedData) {
     //Only use cache if cannot get res from network
-    if (!networkDataReceived) {
-      console.log('From cache: ', cachedData);
+      if (!networkDataReceived) {
+        console.log('From cache: ', cachedData);
 
-      //the objects received is put into an array, no need to convert to array
-      updateUI(cachedData); //With cached version
-    }
-  });
-  // caches
-  //   .match(url)
-  //   .then(function (response) {
-  //     //Only if there is a response / request-response is cached
-  //     if (response) {
-  //       return response.json();
-  //     }
-  //   })
-  //   .then(function (data) {
-  //     //Only load from cache if cannot get from network (newest version)
-  //     if (!networkDataReceived) {
-  //       console.log('From cache: ', data);
-
-  //       //Change object received as data to array
-  //       let dataArray = [];
-  //       for (let item in data) {
-  //         dataArray.push(data[item]);
-  //         //Structure of data received {posts: {post1:{item1}, post2:{item2}, post3:{item3}}} / key(post1,2,3...)-values(item1,2,3...)
-  //         //Create the array with only the items
-  //       }
-
-  //       updateUI(dataArray); //with cached version
-  //     }
-  //   });
-}
+        //the objects received is put into an array, no need to convert to array
+        updateUI(cachedData); //With cached version
+      }
+    })
+};

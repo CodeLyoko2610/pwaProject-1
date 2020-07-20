@@ -238,4 +238,41 @@ self.addEventListener('fetch', function (event) {
 // })
 // })
 
-//testing
+//Handling background sync
+self.addEventListener('sync', (e)=>{
+  console.log('[Service Worker] Background syncing', e)
+
+  if(e.tag === 'sync-new-posts'){
+    console.log('[Service Worker] Syncing new posts...')
+
+    e.waitUntil(
+      readAllData('sync-posts')
+        .then(data => {
+          for(let item of data){
+            fetch('https://pwagramproject-1.firebaseio.com/posts.json', {
+              method: 'POST',
+              headers: {
+                'Content-Type':'application/json',
+                'Accept':'application/json'
+              },
+              body: JSON.stringify({
+                id: new Date().toISOString(),
+                title: item.title,
+                location: item.location,
+                image: 'https://firebasestorage.googleapis.com/v0/b/pwagramproject-1.appspot.com/o/IMG_7140.JPG?alt=media&token=77d22063-5de1-43cc-a5c0-75eed8dae645'
+              })
+            })
+            .then(res => {
+              console.log('Sent data.', res)    
+              //TODO: Think: Req sent -> Server is updated -> How to fetch updated data FROM SERVICE WORKER - not related to app thread -> periodic sync  
+              //TODO: Change delete logic to get id from Firebase, not latest id        
+              if(res.ok) deleteSingleItem('sync-posts', item.id)
+            })            
+            .catch(err => {
+              console.log('Error while sending data to server.', err)
+            })
+          }
+        })        
+    )
+  }
+})
